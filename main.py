@@ -1,18 +1,26 @@
-import asyncio
-import json
-import websockets
 from dotenv import load_dotenv
-import os
-load_dotenv() 
-import utils
-from datetime import datetime
+import utils, csv, os, websockets, asyncio, json
+from datetime import datetime, timezone
 from models import init_db
+
+load_dotenv()
 
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 
+# create a logs folder if its not there
+
+log_dir = "logs"
+os.makedirs(log_dir, exist_ok=True)
 
 
+# for every file execution create a new log file in the logs folder.
+timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+log_filename = os.path.join(log_dir, f"log-{timestamp}.csv")
+
+with open(log_filename, mode='w', newline='') as file:
+    writer = csv.DictWriter(file, fieldnames=["timestamp", "payload_obj"])
+    writer.writeheader()
 
 # getting 5 instruments
 options = utils.fetch_options_by_expiry()[:5]
@@ -59,8 +67,15 @@ async def main():
 
         print("\n📈 Live BTC-PERPETUAL Ticker Updates:")
         while True:
+            ts_str = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
             message = await ws.recv()
             data = json.loads(message)
+            with open(log_filename, mode='a', newline='') as file:
+                        writer = csv.DictWriter(file, fieldnames=["timestamp", "payload_obj"])
+                        writer.writerow({
+                                        "timestamp": ts_str,
+                                        "payload_obj": json.dumps(data)
+                                    })
 
             if data.get("method") == "subscription" and "params" in data:
                 channel = data["params"]["channel"]  # e.g. ticker.BTC-PERPETUAL.raw

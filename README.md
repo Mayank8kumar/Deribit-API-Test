@@ -1,54 +1,58 @@
 # Deribit Options Ticker Subscriber
 
-This project connects to the Deribit Testnet WebSocket API, authenticates using your API credentials, subscribes to live ticker updates for options and perpetual instruments, stores key data in a SQLite database, and provides a simple way to view recent stored ticker data.
+This project connects to the **Deribit Testnet WebSocket API**, authenticates using your API credentials, subscribes to live ticker updates for BTC perpetual and selected option instruments, stores key data in a SQLite database, and logs raw messages in timestamped CSV files.
 
 ---
 
-## Setup Instructions
+## ✅ Setup Instructions
 
-1. **Clone or download this repository** to your local machine.
+1. **Clone or download this repository**
 
 2. **Create a Python virtual environment (recommended):**
 
-`
+```bash
 python -m venv venv
-source venv/bin/activate  # On Windows use `venv\Scripts\activate`
-`
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
 
-Install required packages:
+3. **Install required packages:**
 
-`
+```bash
 pip install -r requirements.txt
-`
-Set your Deribit Testnet API credentials:
+```
 
-Create a .env file in the root directory with:
+4. **Set your Deribit Testnet API credentials:**
 
-`
+Create a `.env` file in the root directory with the following:
+
+```env
 CLIENT_ID=your_client_id_here
 CLIENT_SECRET=your_client_secret_here
-(You can get testnet credentials from Deribit API portal)
-`
+```
 
-How to Run the Script
-Run the main script to start the WebSocket client, authenticate, subscribe to tickers, and store data:
+*You can obtain testnet credentials from the Deribit developer portal.*
 
-`
+---
+
+## ▶ How to Run the Script
+
+Run the main script to:
+
+* Connect to Deribit WebSocket
+* Authenticate
+* Subscribe to BTC-PERPETUAL and 5 options
+* Log raw payloads
+* Store select data to SQLite
+
+```bash
 python main.py
-`
-The script will:
+```
 
-Authenticate with Deribit Testnet
+---
 
-Subscribe to BTC-PERPETUAL ticker and 5 options (fetched dynamically)
+## 📌 Example Output
 
-Store ticker updates (instrument, price, volatility, delta, timestamp) in SQLite DB (deribit_tickers.db)
-
-Print confirmation of stored data live
-
-Example Output
-
-`
+```bash
 ['BTC-27MAY22-40000-C', 'BTC-27MAY22-42000-C', 'BTC-27MAY22-43000-C', 'BTC-27MAY22-44000-C', 'BTC-27MAY22-45000-C', 'ticker.BTC-PERPETUAL.raw']
 ✅ Authenticated: {"jsonrpc":"2.0","id":1,"result":{...}}
 📡 Subscribed: {"jsonrpc":"2.0","id":2,"result":null}
@@ -56,33 +60,41 @@ Example Output
 [2025-05-28 12:34:56 UTC] Stored: BTC-PERPETUAL, price=30500, iv=0.75, delta=0.45
 [2025-05-28 12:34:57 UTC] Stored: BTC-PERPETUAL, price=30502, iv=0.76, delta=0.46
 ...
+```
 
-`
-How to View Stored Data
-Run the view_data.py script to print the last 10 records stored in the SQLite database:
+---
 
-`
+## 🗂 How to View Stored Data
+
+Run the `view_data.py` script to print the last 10 records stored in the SQLite database:
+
+```bash
 python view_data.py
-`
-Example output:
+```
 
+### Example Output
 
- ** Here Are The Last 10 records:- ** 
+```
+** Here Are The Last 10 records:- **
 
 2025-05-28 12:34:57 UTC | Instrument: BTC-PERPETUAL | Price: 30502 | IV: 0.76 | Delta: 0.46
 2025-05-28 12:34:56 UTC | Instrument: BTC-PERPETUAL | Price: 30500 | IV: 0.75 | Delta: 0.45
 ...
+```
 
-** End of Last 10 Records **
+---
 
-Project Structure
-main.py — Main async script to connect, authenticate, subscribe, and store ticker data
+## 🧾 Project Structure
 
-models.py — Database initialization and schema
+```
+.
+├── main.py          # Main WebSocket client with auth, subscription, DB + CSV logging
+├── view_data.py     # Helper to view last 10 DB entries
+├── models.py        # SQLite DB schema setup
+├── utils.py         # Helper to fetch Deribit option instruments
+├── .env             # (not included) API credentials
+├── logs/            # Auto-created folder for storing CSV logs
+└── deribit_tickers.db # SQLite DB file (auto-created)
+```
 
-utils.py — Helper to fetch options instruments from Deribit API
-
-view_data.py — Script to query and print recent stored data
-
-.env — Your API credentials (not included in repo for security)
-
+---
